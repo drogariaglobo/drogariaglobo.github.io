@@ -2,7 +2,7 @@
 
     try {
         console.log("[DAG] - Product - Development Script.");
-        const middleware = 'https://drogariaglobo-middleware.herokuapp.com';
+        const middleware = 'https://dev-dag-heroku-middleware.herokuapp.com';
         let PBMproduct = {
             init: () => {
                 PBMproduct.setAvailableBodyClass();

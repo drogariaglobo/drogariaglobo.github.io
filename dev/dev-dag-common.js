@@ -204,7 +204,6 @@
                     slidesToScroll: 4,
                     infinite: true,
                     arrows: true,
-                    dots: true,
                     responsive: [{
                         breakpoint: 1024,
                         settings: {

@@ -19,6 +19,7 @@
             },
             windowOnload: () => {},
             ajaxStop: () => {},
+            pbmCurrentProductOn: null,
             pbmSpecData: null,
             pbmTypeField: null,
             routes: {
@@ -51,6 +52,7 @@
             verifyStatusDiscount: () => {
                 if (localStorage.getItem("dagProductRegistered")) {
                     console.info("\n[PBM] - Registro feito. Buscando descontos...\n");
+                    $(".pbm-standard-discount").removeClass("standard-discount-on");
                     PBMproduct.consultDiscountIntegrationAfterRegister();
                 } else {
                     if (orionLocalStorage.getItem("dagCurrentCart")) {
@@ -61,18 +63,15 @@
                         if (findProduct) {
                             $(".product-right__buy-button").hide();
                             $(".dag-product.pbm").removeAttr("style");
+                            $(".pbm-standard-discount").removeClass("standard-discount-on");
                             $(".pbm-discount-activated").addClass("discount-activated-on");
+                            PBMproduct.pbmCurrentProductOn = true;
                             PBMproduct.lockingDefaultBuyButtons();
                         } else {
                             $(".dag-product.pbm").removeAttr("style");
                             $(".pbm-standard-discount").addClass("standard-discount-on");
                         }
-                    } 
-                    // else {
-                    //     console.info("\n[PBM] - Produto tem PBM!\n");
-                    //     $(".dag-product.pbm").removeAttr("style");
-                    //     $(".pbm-standard-discount").addClass("standard-discount-on");
-                    // }
+                    }
                 }
             },
             // Dados do produto
@@ -149,16 +148,31 @@
                             }
                         }
                         
-                        $(".pbm-prod-price").text(PBMproduct.pbmSpecData.standardPrice);
-                        $(".pbm-prod-discount-activated-text").text(PBMproduct.pbmSpecData.industryName);
-                        // $(".dag-product.pbm").removeAttr("style");
-                        $(".dag-product.pbm").removeAttr("style");
-                        $(".pbm-standard-discount").addClass("standard-discount-on");
+                        if (PBMproduct.pbmCurrentProductOn == true) {
+                            $(".pbm-prod-price").text(PBMproduct.pbmSpecData.standardPrice);
+                            $(".pbm-prod-discount-activated-text").text(PBMproduct.pbmSpecData.industryName);
+                            $(".dag-product.pbm").removeAttr("style");
+                            // $(".pbm-standard-discount").addClass("standard-discount-on");
+                        } else {
+                            $(".pbm-prod-price").text(PBMproduct.pbmSpecData.standardPrice);
+                            $(".pbm-prod-discount-activated-text").text(PBMproduct.pbmSpecData.industryName);
+                            $(".dag-product.pbm").removeAttr("style");
+                            $(".pbm-standard-discount").addClass("standard-discount-on");
+                        }
+
                     } else {
+                        // Salvando todas especificaoes relacionadas ao PBM
+                        let comOffer = prodData.items[0].sellers[0].commertialOffer;
+                        PBMproduct.pbmSpecData = { 
+                            ean: prodData.items[0].ean,
+                            quantity: comOffer.AvailableQuantity,
+                            seller: prodData.items[0].sellers[0].sellerId
+                        } 
+
                         console.info("\n[PBM] - Produto não faz parte do PBM.\n");
-                        // $(".dag-product.pbm").hide();
+                        $(".dag-product.pbm").hide();
                     }
-                }
+                } 
             },
             pbmAllEvents: () => {
                 // Botão Desconto Padrão
@@ -272,6 +286,7 @@
 
                     let prodInfo = {
                         id: PBMproduct.data.productId,
+                        skuId: skuJson.skus[0].sku,
                         packId: 0,
                         EAN: PBMproduct.data.items[0].ean,
                         requestedQuantity: 1,
@@ -516,7 +531,9 @@
                         cpf: localStorage.getItem("dagUserCPF") || null,
                         card: localStorage.getItem("dagUserCard") || null,
                         consultList: listCartProduts,
-                        tableId: PBMproduct.pbmSpecData.todayTableId
+                        tableId: PBMproduct.pbmSpecData.todayTableId,
+                        orderFormId: vtexjs.checkout.orderForm.orderFormId,
+                        sc: vtexjs.checkout.orderForm.salesChannel
                     }
                     
                     // Resposta API carrinho Interplayers
@@ -580,7 +597,7 @@
                                 }
 
                             } else {
-                                // Product com Combo
+                                // Product Com Combo!
                                 if (typeof PBMproduct.pbmSpecData.eanCombos.listCombos == "object") {
                                     console.log("CARRINHO COM DESCONTO COMBO!");
                                     
@@ -650,6 +667,7 @@
                                         }
                                     }
                                 } 
+                                // Carrinho SEM Combo
                                 else {
                                     console.log("CARRINHO NORMAL SEM COMBO!");
                                     let dataCart = { 
@@ -689,9 +707,7 @@
                     }
                 });
             },
-            organizeDataForCart: (dataItemCart) => {
-
-            },
+            organizeDataForCart: (dataItemCart) => {},
             addProductInCartPBM: (dataParam) => {
                 let itemToCart = {
                     id: skuJson.skus[0].sku,
@@ -763,9 +779,7 @@
                     }, 2000);
                 });
             },
-            addProductInCartCombo: () => {
-
-            },
+            addProductInCartCombo: () => {},
             applyDefaultsBuybutton: () => {
                 
                 let inputQtt = $(".prod-default-buybuttons.qtt");
@@ -792,23 +806,20 @@
                         $(this).addClass("minus-limit");
                         return;
                     }
-
                     btnMore.removeClass("more-limit");
-
                     let currentValue = parseInt(inputQtt.val());
                     currentValue = currentValue - 1;
-
                     if (currentValue == 1) {
                         $(this).addClass("minus-limit");
                     }
-
                     inputQtt.val(currentValue);
+
                 });
 
                 // Btn: More
                 btnMore.on("click", function (e) {
                     e.preventDefault();
-
+                    
                     btnMinus.removeClass("minus-limit");
 
                     if (PBMproduct.pbmSpecData.quantity == 1) {
@@ -830,6 +841,7 @@
                     }
 
                     inputQtt.val(currentValue);
+                    
                 });
 
                 // Btn: Cart

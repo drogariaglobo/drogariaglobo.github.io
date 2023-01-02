@@ -1,2 +1,23 @@
-/* Orion CSS | DESKTOP-EB0OVV3 - 02/01/2023 11:56:15 GMT-0300 */
-div[id^=ResultItems]>div ul{display:flex;flex-direction:row;flex-wrap:wrap}div[id^=ResultItems]>div ul li[layout]{width:47.5%;margin:0 5px 15px 0}@media (min-width: 991px){div[id^=ResultItems]>div ul li[layout]{width:30%;margin:0 15px 25px 0}}div[id^=ResultItems]>div ul li.helperComplement{display:none}
+/* Orion CSS | DESKTOP-EB0OVV3 - 02/01/2023 11:58:11 GMT-0300 */
+div[id^=ResultItems] > div ul {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  div[id^=ResultItems] > div ul li[layout] {
+    width: 47.5%;
+    margin: 0 5px 15px 0;
+  }
+  
+  @media (min-width: 991px) {
+    div[id^=ResultItems] > div ul li[layout] {
+      width: 30%;
+      margin: 0 15px 25px 0;
+    }
+  }
+  
+  div[id^=ResultItems] > div ul li.helperComplement {
+    display: none;
+  }
+  
